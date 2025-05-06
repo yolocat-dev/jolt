@@ -962,14 +962,42 @@ impl<'a, I> Parser<'a, I> where
     }
 
     fn parse_identifier(&mut self, identifier: Token) -> Result<Node> {
-        let mut path = match identifier.value {
-            Value::String(path) => path,
+        let mut expr = match identifier.value {
+            Value::String(ident) => Node::Identifier(ident),
             _ => panic!("Kind::Identifier should always have a String value"),
         };
 
         while let Some(token) = self.peek() {
-            d_expect!(Kind::LeftParen, Kind::PathSeparator);
+            d_expect!(Kind::LeftParen, Kind::PathSeparator, Kind::FieldAccess);
             match token.kind {
+                Kind::PathSeparator => {
+                    d_advance!(self);
+
+                    let ident = self.expect(Kind::Identifier, "expected identifier after path separator")?;
+                    let name = match ident.value {
+                        Value::String(name) => name,
+                        _ => panic!("Kind::Identifier should always have a String value"),
+                    };
+
+                    expr = Node::PathAccess {
+                        base: Box::new(expr),
+                        segment: name,
+                    };
+                },
+                Kind::FieldAccess => {
+                    d_advance!(self);
+
+                    let ident = self.expect(Kind::Identifier, "expected field name")?;
+                    let name = match ident.value {
+                        Value::String(name) => name,
+                        _ => panic!("Kind::Identifier should always have a String value"),
+                    };
+
+                    expr = Node::FieldAccess {
+                        object: Box::new(expr),
+                        field: name,
+                    };
+                },
                 Kind::LeftParen => {
                     d_advance!(self);
 
@@ -1011,23 +1039,13 @@ impl<'a, I> Parser<'a, I> where
                         }
                     }
 
-                    return Ok(Node::FunctionCall(path, args));
+                    expr = Node::FunctionCall(Box::new(expr), args);
                 },
-                Kind::PathSeparator => {
-                    d_advance!(self);
-
-                    path.push_str("::");
-
-                    path.push_str(&match self.expect(Kind::Identifier, "expected identifier")?.value {
-                        Value::String(path) => path,
-                        _ => panic!("Kind::Identifier should always have a String value"),
-                    });
-                }
-                _ => return Ok(Node::Identifier(path)),
+                _ => break,
             }
         }
 
-        Ok(Node::Identifier(path))
+        Ok(expr)
     }
 
     fn parse_numeric(&mut self, numeric: Token) -> Result<Node> {

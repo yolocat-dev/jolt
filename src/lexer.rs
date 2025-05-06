@@ -138,6 +138,7 @@ impl<'a> Lexer<'a> {
             "use" => Kind::UseKeyword,
             "struct" => Kind::StructKeyword,
             "trait" => Kind::TraitKeyword,
+            "pub" => Kind::PubKeyword,
             _ => Kind::Identifier,
         };
 

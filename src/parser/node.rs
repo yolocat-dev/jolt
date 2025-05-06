@@ -16,7 +16,7 @@ pub enum Node {
         type_: String,
     },
     Block(Vec<Node>),
-    FunctionCall(String, Vec<Node>),
+    FunctionCall(Box<Node>, Vec<Node>),
     Return(Box<Node>),
     BinaryExpr {
         left: Box<Node>,
@@ -86,6 +86,14 @@ pub enum Node {
         name: String,
         implements: Vec<String>,
         methods: Vec<Node>,
+    },
+    PathAccess {
+        base: Box<Node>,
+        segment: String,
+    },
+    FieldAccess {
+        object: Box<Node>,
+        field: String,
     },
 }
 
