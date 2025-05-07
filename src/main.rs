@@ -17,16 +17,20 @@ fn main() -> Result<()> {
     let command = if args.len() > 1 {
         &args[1]
     } else {
-        "parse"
+        "pretty-parse"
     };
 
     match command {
         "lex" => {
             lex()
         },
-        _ => {
+        "parse" => {
             parse()
-        }
+        },
+        "pretty-parse" => {
+            pretty_parse()
+        },
+        _ => unimplemented!(),
     }
 }
 
@@ -51,6 +55,20 @@ fn parse() -> Result<()> {
     let file = parser.parse()?;
 
     println!("{:#?}", file);
+
+    Ok(())
+}
+
+fn pretty_parse() -> Result<()> {
+    let source = include_str!("../test.jt");
+
+    let lexer = Lexer::new("test.jt", source);
+    let tokens = lexer.lex()?;
+
+    let parser = Parser::new(tokens.into_iter().filter(|t| t.kind != Kind::Comment), "test.jt", source);
+    let file = parser.parse()?;
+
+    println!("{}", file);
 
     Ok(())
 }

@@ -11,9 +11,10 @@ pub struct Parser<'a, I> where
     source: &'a str,
 }
 
+mod display;
 pub mod node;
 
-const DEBUG: bool = false;
+const DEBUG: bool = true;
 
 macro_rules! d_expect {
     ($($kind:expr),*) => {
@@ -212,12 +213,12 @@ impl<'a, I> Parser<'a, I> where
     fn parse_statement(&mut self) -> Result<Node> {
         let token = self.peek().expect("parse_statement are not allowed to be called if is_at_end()");
 
-        d_expect!(Kind::ReturnKeyword, Kind::WhileKeyword, Kind::ForKeyword, Kind::VarKeyword, Kind::MutKeyword, Kind::LeftBrace);
+        d_expect!(Kind::ReturnKeyword, Kind::WhileKeyword, Kind::ForKeyword, Kind::ValKeyword, Kind::MutKeyword, Kind::LeftBrace);
         match token.kind {
             Kind::ReturnKeyword => self.parse_return(),
             Kind::WhileKeyword => self.parse_while(),
             Kind::ForKeyword => self.parse_for(),
-            Kind::VarKeyword => self.parse_var(false),
+            Kind::ValKeyword => self.parse_var(false),
             Kind::MutKeyword => self.parse_var(true),
             Kind::LeftBrace => self.parse_block(),
             _ => self.parse_expression(),
@@ -743,7 +744,7 @@ impl<'a, I> Parser<'a, I> where
         d_advance!(self);
 
         if mutable {
-            self.expect(Kind::VarKeyword, "expected `var` keyword")?;
+            self.expect(Kind::ValKeyword, "expected `var` keyword")?;
         }
 
         let name = match self.expect(Kind::Identifier, "expected variable name (identifier)")?.value {

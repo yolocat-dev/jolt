@@ -23,7 +23,7 @@ pub enum Kind {
     ForKeyword,
     InKeyword,
     WhileKeyword,
-    VarKeyword,
+    ValKeyword,
     MutKeyword,
     UseKeyword,
     StructKeyword,

@@ -133,7 +133,7 @@ impl<'a> Lexer<'a> {
             "for" => Kind::ForKeyword,
             "in" => Kind::InKeyword,
             "while" => Kind::WhileKeyword,
-            "var" => Kind::VarKeyword,
+            "val" => Kind::ValKeyword,
             "mut" => Kind::MutKeyword,
             "use" => Kind::UseKeyword,
             "struct" => Kind::StructKeyword,
